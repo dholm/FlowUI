@@ -31,103 +31,25 @@ import textwrap
 from flowui.widget import Widget
 
 
-class Cell(Widget):
-    _format_exp = re.compile(r'(%\([^\s]+?\)s)')
-
-    def __init__(self, contents=''):
-        super(Cell, self).__init__()
-        self._contents = ''
-        if contents:
-            self._contents = (' %s ' % contents)
-
-    def width(self, theme):
-        return theme.len(self._contents)
-
-    def contents(self):
-        return self._contents
-
-    def draw(self, terminal, width):
-        split = self._format_exp.split(self._contents)
-        contents = [[]]
-        width_left = width
-        last_format = ''
-        for item in split:
-            if self._format_exp.match(item):
-                contents[-1].append(item)
-                last_format = item
-
-            else:
-                item_len = len(item.replace('%%', '%'))
-                if item_len <= width_left:
-                    contents[-1].append(item)
-                    width_left -= item_len
-
-                elif item_len < width:
-                    contents.append([last_format, item])
-                    width_left = width - item_len
-
-                elif len(item[:width_left]):
-                    first = textwrap.wrap(item[:width_left], width_left)[0]
-                    contents[-1].append(first)
-                    rest = textwrap.wrap(item[len(first):], width)
-                    for line in rest:
-                        contents.append([last_format, line])
-                    width_left = width - len(contents[-1][-1])
-
-        contents = [''.join(x) for x in contents]
-        cell_content = ''
-        if len(contents):
-            cell_content = contents[0]
-
-        line_width = terminal.len(cell_content)
-        padding = ' ' * (width - line_width)
-        terminal.write(('%(contents)s%(padding)s' %
-                        {'contents': cell_content,
-                         'padding': padding}))
-
-        return ''.join(contents[1:])
-
-
-class Row(Widget):
-    def __init__(self):
-        super(Row, self).__init__()
-        self._cells = []
-
-    def cells(self):
-        return self._cells
-
-    def add_cell(self, cell):
-        self._cells.append(cell)
-
-    def width(self, terminal):
-        width = 0
-        for cell in self._cells:
-            width += cell.width(terminal)
-        return width
-
-    def draw(self, terminal, cell_widths):
-        assert len(cell_widths) == len(self._cells)
-
-        cells_rest = []
-        for i in range(len(self._cells)):
-            rest = self._cells[i].draw(terminal, cell_widths[i])
-            if len(rest):
-                cells_rest.append(rest)
-            else:
-                cells_rest.append(None)
-
-        if cells_rest.count(None) < len(cells_rest):
-            row = Row()
-            for content in cells_rest:
-                if content is None:
-                    row.add_cell(Cell(''))
-                else:
-                    row.add_cell(Cell(content))
-            return row
-        return None
-
-
 class Table(Widget):
+    '''Table widget
+
+    The table is a widget for structured data presentation. It is very similar
+    to the table widget of HTML or as used by many spreadsheet tools. A table
+    can consist of rows and or cells that are laid out in an orderly fashion on
+    screen.
+
+    Cells that are stored in rows are sized so that each column lines up
+    vertically in every row. The size of each cell is calculated based on the
+    maximum available table width and the size of each cell. If the cells of a
+    row are too big to fit on one row they are broken up into multiple lines
+    which are aligned within each column.
+
+    Cells that are not stored in rows are all normalized to the same size and
+    lined up vertically in the table as if they all belonged to a row
+    consisting of the maximum number of cells that will fit on a row.
+
+    '''
     def _max_cell_width(self, terminal):
         max_width = 0
         for cell in self._cells:
@@ -140,10 +62,12 @@ class Table(Widget):
         self._cells = []
 
     def add_cell(self, cell):
+        '''Adds the cell to the table'''
         assert isinstance(cell, Cell)
         self._cells.append(cell)
 
     def add_row(self, row):
+        '''Adds the row to the table'''
         assert isinstance(row, Row)
         self._cols_per_row = max(len(row.cells()), self._cols_per_row)
         self._rows.append(row)
@@ -271,7 +195,116 @@ class Table(Widget):
                 terminal.write('%s\n' % padding)
 
     def draw(self, terminal, width):
+        '''Draw the table on the specified terminal constrained to the
+        specified width'''
         if self._rows:
             self._draw_rows(terminal, width)
         if self._cells:
             self._draw_cells(terminal, width)
+
+
+class Row(Widget):
+    '''A table row'''
+
+    def __init__(self):
+        super(Row, self).__init__()
+        self._cells = []
+
+    def cells(self):
+        '''Returns a list of the cells stored in the row'''
+        return self._cells
+
+    def add_cell(self, cell):
+        '''Appends the cell to the row'''
+        self._cells.append(cell)
+
+    def width(self, terminal):
+        '''Calculate and return the width of the row in characters'''
+        width = 0
+        for cell in self._cells:
+            width += cell.width(terminal)
+        return width
+
+    def draw(self, terminal, cell_widths):
+        '''Draw the row on the terminal using the defined column widths'''
+        assert len(cell_widths) == len(self._cells)
+
+        cells_rest = []
+        for i in range(len(self._cells)):
+            rest = self._cells[i].draw(terminal, cell_widths[i])
+            if len(rest):
+                cells_rest.append(rest)
+            else:
+                cells_rest.append(None)
+
+        if cells_rest.count(None) < len(cells_rest):
+            row = Row()
+            for content in cells_rest:
+                if content is None:
+                    row.add_cell(Cell(''))
+                else:
+                    row.add_cell(Cell(content))
+            return row
+        return None
+
+
+class Cell(Widget):
+    '''A table cell'''
+
+    _format_exp = re.compile(r'(%\([^\s]+?\)s)')
+
+    def __init__(self, contents=''):
+        super(Cell, self).__init__()
+        self._contents = ''
+        if contents:
+            self._contents = (' %s ' % contents)
+
+    def width(self, theme):
+        '''Calculate and return the width in characters of the cell contents'''
+        return theme.len(self._contents)
+
+    def contents(self):
+        '''Return the contents of the cell'''
+        return self._contents
+
+    def draw(self, terminal, width):
+        '''Draw the cell on the terminal constrained to the specified width'''
+        split = self._format_exp.split(self._contents)
+        contents = [[]]
+        width_left = width
+        last_format = ''
+        for item in split:
+            if self._format_exp.match(item):
+                contents[-1].append(item)
+                last_format = item
+
+            else:
+                item_len = len(item.replace('%%', '%'))
+                if item_len <= width_left:
+                    contents[-1].append(item)
+                    width_left -= item_len
+
+                elif item_len < width:
+                    contents.append([last_format, item])
+                    width_left = width - item_len
+
+                elif len(item[:width_left]):
+                    first = textwrap.wrap(item[:width_left], width_left)[0]
+                    contents[-1].append(first)
+                    rest = textwrap.wrap(item[len(first):], width)
+                    for line in rest:
+                        contents.append([last_format, line])
+                    width_left = width - len(contents[-1][-1])
+
+        contents = [''.join(x) for x in contents]
+        cell_content = ''
+        if len(contents):
+            cell_content = contents[0]
+
+        line_width = terminal.len(cell_content)
+        padding = ' ' * (width - line_width)
+        terminal.write(('%(contents)s%(padding)s' %
+                        {'contents': cell_content,
+                         'padding': padding}))
+
+        return ''.join(contents[1:])

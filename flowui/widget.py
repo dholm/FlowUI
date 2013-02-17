@@ -25,7 +25,29 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import abc
+
 
 class Widget(object):
+    '''Abstract base class for all Widgets
+
+    Defines the required API of any widget that is part of FlowUI and all
+    Widgets must derive from this class.
+
+    '''
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def draw(self, terminal, width):
+        '''Render the widget
+
+        Draw the widget onto the specified terminal constrained to the
+        specified width.
+
+        Keyword arguments:
+        terminal -- the output terminal
+        width -- the maximum number of characters to span per line
+
+        '''
         raise NotImplementedError()

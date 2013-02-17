@@ -29,6 +29,14 @@ from flowui.theme import Theme
 
 
 class Zenburn(Theme):
+    '''Zenburn theme
+
+    This theme is based on Zenburn by Jani Nurminen which is a low-contrast
+    color scheme designed to be easy on the eyes.
+
+    http://slinky.imukuppi.org/zenburnpage/
+
+    '''
     def __init__(self, depth):
         default_bg = 237
         super(Zenburn, self).__init__(self._color(depth, 188, default_bg))

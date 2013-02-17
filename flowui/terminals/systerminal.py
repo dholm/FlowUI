@@ -32,6 +32,12 @@ from flowui.terminal import Terminal
 
 
 class SysTerminal(Terminal):
+    '''Python sys based terminal
+
+    This terminal emulator is using the sys.stdout interface defined by the
+    Python runtime.
+
+    '''
     def __init__(self):
         width = int(os.popen('tput cols').read().strip())
         height = int(os.popen('tput lines').read().strip())
