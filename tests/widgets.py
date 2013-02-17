@@ -27,6 +27,7 @@
 
 from unittest import TestCase
 
+from flowui import ThemedTerminal
 from flowui.terminals import SysTerminal
 from flowui.themes import Solarized
 from flowui.widgets import Section
@@ -34,30 +35,27 @@ from flowui.widgets import table
 
 
 class WidgetsTest(TestCase):
-    def theme(self):
-        return self._theme
-
     def setUp(self):
-        self._terminal = SysTerminal()
-        self._theme = Solarized(self._terminal.depth())
+        terminal = SysTerminal()
+        theme = Solarized(terminal.depth())
+        self._terminal = ThemedTerminal(terminal, theme)
 
-        reset = self.theme().property('normal')
-        self._terminal.write('%s\n\t# Begin Widget #\n' % reset)
+        self._terminal.reset()
+        self._terminal.write('\n\t# Begin Widget #\n')
 
     def tearDown(self):
-        reset = self.theme().property('normal')
-        self._terminal.write('%s\t# End Widget #\n' % reset)
+        self._terminal.reset()
+        self._terminal.write('\t# End Widget #\n')
 
     def test_section(self):
         section = Section('test section')
-        section.draw(self._terminal, self._theme, self._terminal.width())
+        section.draw(self._terminal, self._terminal.width())
 
-        self.assertRaises(AssertionError, section.draw, self._terminal,
-                          self._theme, 1)
+        self.assertRaises(AssertionError, section.draw, self._terminal, 1)
 
     def test_table(self):
         tbl = table.Table()
-        tbl.draw(self._terminal, self._theme, self._terminal.width())
+        tbl.draw(self._terminal, self._terminal.width())
 
     def test_tables_cells(self):
         tbl = table.Table()
@@ -66,7 +64,7 @@ class WidgetsTest(TestCase):
             tbl.add_cell(cell)
 
         width = int(self._terminal.width() / 2)
-        tbl.draw(self._terminal, self._theme, width)
+        tbl.draw(self._terminal, width)
 
     def test_table_row_multiline_cell(self):
         row = table.Row()
@@ -75,12 +73,12 @@ class WidgetsTest(TestCase):
                  table.Cell('Third col')]
         for cell in cells:
             row.add_cell(cell)
-        row_len = (sum(x.width(self._theme) for x in cells) -
-                   int(cells[1].width(self._theme) / 2))
+        row_len = (sum(x.width(self._terminal) for x in cells) -
+                   int(cells[1].width(self._terminal) / 2))
 
         tbl = table.Table()
         tbl.add_row(row)
-        tbl.draw(self._terminal, self._theme, row_len)
+        tbl.draw(self._terminal, row_len)
 
     def test_tables_rows(self):
         tbl = table.Table()
@@ -93,7 +91,7 @@ class WidgetsTest(TestCase):
             tbl.add_row(row)
 
         width = int(self._terminal.width() / 2)
-        tbl.draw(self._terminal, self._theme, width)
+        tbl.draw(self._terminal, width)
 
     def test_table_cells_rows(self):
         tbl = table.Table()
@@ -108,7 +106,7 @@ class WidgetsTest(TestCase):
             tbl.add_cell(cell)
 
         width = int(self._terminal.width() / 2)
-        tbl.draw(self._terminal, self._theme, width)
+        tbl.draw(self._terminal, width)
 
     def test_table_rows_varying_cells(self):
         data = [['col 1', 'col 2', 'col 3'],
@@ -123,4 +121,4 @@ class WidgetsTest(TestCase):
 
             tbl.add_row(row)
 
-        tbl.draw(self._terminal, self._theme, self._terminal.width())
+        tbl.draw(self._terminal, self._terminal.width())

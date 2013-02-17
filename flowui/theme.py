@@ -122,12 +122,6 @@ class Theme(object):
         filtered = self._filter_string(string)
         return len(self._ansi_escape_expression.sub('', (filtered % d)))
 
-    def clear(self):
-        return self.control('clear-screen')
-
-    def reset(self):
-        return self.property('normal')
-
     def write(self, string, format_dictionary=None):
         d = self._faces
         if format_dictionary:

@@ -36,24 +36,24 @@ class Section(Widget):
         self._name = name
         self._components = []
 
-    def _draw_header(self, theme, width):
+    def _draw_header(self, terminal, width):
         title = ''
         if self._name:
             title = ('[%s]' % self._name)
-        assert theme.len(title) <= width
+        assert terminal.len(title) <= width
 
         header = ['%(face-header)s']
         dashes = int(width - len(title))
         header += ['-' for _ in range(dashes)]
         header += [title, '\n']
-        return theme.write(''.join(header))
+        terminal.write(''.join(header))
 
     def add_component(self, component):
         self._components.append(component)
 
-    def draw(self, terminal, theme, width):
+    def draw(self, terminal, width):
         width -= (width / 20)
-        terminal.write(self._draw_header(theme, width))
+        self._draw_header(terminal, width)
 
         for component in self._components:
-            component.draw(terminal, theme, width)
+            component.draw(terminal, width)

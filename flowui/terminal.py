@@ -40,6 +40,11 @@ class Terminal(object):
     def write(self, string, dictionary=None):
         raise NotImplementedError()
 
+    def len(self, string, dictionary=None):
+        if dictionary is not None:
+            string = string.format(dictionary)
+        len(string)
+
     def depth(self):
         return self._depth
 
@@ -48,3 +53,24 @@ class Terminal(object):
 
     def height(self):
         return self._height
+
+
+class ThemedTerminal(Terminal):
+    def __init__(self, terminal, theme):
+        super(ThemedTerminal, self).__init__(terminal.width(),
+                                             terminal.height(),
+                                             terminal.depth())
+        self._terminal = terminal
+        self._theme = theme
+
+    def len(self, string, dictionary=None):
+        return self._theme.len(string, dictionary)
+
+    def clear(self):
+        self._terminal.write(self._theme.control('clear-screen'))
+
+    def reset(self):
+        self._terminal.write(self._theme.property('normal'))
+
+    def write(self, string, dictionary=None):
+        self._terminal.write(self._theme.write(string, dictionary))

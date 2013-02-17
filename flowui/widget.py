@@ -27,5 +27,5 @@
 
 
 class Widget(object):
-    def draw(self, terminal, theme, width):
+    def draw(self, terminal, width):
         raise NotImplementedError()

@@ -27,38 +27,36 @@
 
 from unittest import TestCase
 
+from flowui import ThemedTerminal
 from flowui.terminals import SysTerminal
 from flowui.themes import Solarized
 from flowui.themes import Zenburn
 
 
 class ThemeTest(object):
-    def setUp(self):
-        self._terminal = SysTerminal()
+    def setUp(self, terminal, theme):
+        self._theme = theme
+        self._terminal = ThemedTerminal(terminal, theme)
 
     def tearDown(self):
-        reset = self.theme().property('normal')
-        self.terminal().write('%s\n' % reset)
-
-    def theme(self):
-        raise NotImplementedError()
-
-    def terminal(self):
-        return self._terminal
+        self._terminal.reset()
 
     def test_faces(self):
-        reset = self.theme().property('normal')
-        self.terminal().write('\n')
-        for name, face in self.theme().faces().items():
-            self.terminal().write(self.theme().write('\t%s[%s]%s\n' %
-                                                     (face, name, reset)))
+        self._terminal.reset()
+        for name, face in self._theme.faces().items():
+            self._terminal.write('\t%s[%s]%s\n' %
+                                 (face, name, self._theme.property('normal')))
 
 
 class SolarizedTest(ThemeTest, TestCase):
-    def theme(self):
-        return Solarized(self.terminal().depth())
+    def setUp(self, terminal=None, theme=None):
+        terminal = SysTerminal()
+        theme = Solarized(terminal.depth())
+        super(SolarizedTest, self).setUp(terminal, theme)
 
 
 class ZenburnTest(ThemeTest, TestCase):
-    def theme(self):
-        return Zenburn(self.terminal().depth())
+    def setUp(self, terminal=None, theme=None):
+        terminal = SysTerminal()
+        theme = Zenburn(terminal.depth())
+        super(ZenburnTest, self).setUp(terminal, theme)
