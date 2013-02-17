@@ -29,10 +29,21 @@ from flowui.widget import Widget
 
 
 class Section(Widget):
+    '''Section widget
+
+    This widget provides a section into which other widgets can be grouped. It
+    supports an optional headline which can be used to describe its contents.
+
+    '''
     _name = None
     _components = None
 
-    def __init__(self, name):
+    def __init__(self, name=None):
+        '''
+        Keyword arguments:
+        name -- optional name to use in section headline
+
+        '''
         self._name = name
         self._components = []
 
@@ -49,6 +60,7 @@ class Section(Widget):
         terminal.write(''.join(header))
 
     def add_component(self, component):
+        '''Adds the specified component to the section'''
         self._components.append(component)
 
     def draw(self, terminal, width):

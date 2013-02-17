@@ -29,6 +29,12 @@ from flowui.theme import Theme
 
 
 class Solarized(Theme):
+    '''Solarized theme
+
+    This theme is based on Ethan Schoonover's excellent theme as described on
+    his page: http://ethanschoonover.com/solarized
+
+    '''
     _color_map = {8: [(0, 'bold'), 0, (2, 'bold'), (3, 'bold'), (4, 'bold'),
                       (6, 'bold'), 7, (7, 'bold'), 3, (1, 'bold'), 1, 5,
                       (5, 'bold'), 4, 6, 2],

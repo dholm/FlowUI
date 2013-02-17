@@ -29,46 +29,50 @@ import re
 
 
 class Theme(object):
+    '''Base class for all FlowUI themes
+
+    The Theme class provides all the basic functionality required to make a
+    FlowUI theme work together with a Terminal instance. The purpose is to
+    abstract as much as possible of the functionality so that the Theme only
+    has to define the colors relevant to it.
+
+    Controls:
+    clear-screen -- Clear the screen and reset the cursor
+
+    Properties:
+    normal -- normal face
+    bold
+    italic
+    underline
+
+    Faces:
+    face-normal
+    face-comment
+    face-constant   -- string, char, number etc constants
+    face-identifier -- variable/function name
+    face-statement  -- statements (if, else, for etc)
+    face-define     -- definitions (i.e. #define X)
+    face-type       -- types (integer, static, struct etc)
+    face-special    -- special symbols or characters
+    face-underlined -- text that stands out (i.e. links)
+    face-error
+    face-attention  -- anything that needs extra attention
+    face-header     -- section headers etc
+
+    '''
     _ansi_escape_expression = re.compile((r'\x1B\[((\d+|"[^"]*")'
                                           r'(;(\d+|"[^"]*"))*)?'
                                           r'[A-Za-z]'))
 
-    '''Controls
-    clear-screen - Clear the screen and reset the cursor
-    '''
     _controls = {'clear-screen': '\x1b[2J'}
-
-    '''Properties
-    normal     - normal face
-    bold
-    italic
-    underline
-    '''
     _property_fmt = '\x1b[%dm'
     _properties = {'normal': 0,
                    'bold': 1,
                    'italic': 2,
                    'underline': 4}
-
     _colors_fmt = {8: '\x1b[%d;3%1d;4%1dm',
                    16: '\x1b[%d;38;5;%d;48;5;%dm',
                    256: '\x1b[%d;38;5;%d;48;5;%dm'}
-
-    '''Faces
-    face-normal
-    face-comment
-    face-constant   - string, char, number etc constants
-    face-identifier - variable/function name
-    face-statement  - statements (if, else, for etc)
-    face-define     - definitions (i.e. #define X)
-    face-type       - types (integer, static, struct etc)
-    face-special    - special symbols or characters
-    face-underlined - text that stands out (i.e. links)
-    face-error
-    face-attention  - anything that needs extra attention
-
-    face-header     - section headers etc
-    '''
 
     def _add_face(self, face, color, prop='normal'):
         if prop in self._properties:
@@ -84,6 +88,11 @@ class Theme(object):
                 (prop, fg, bg))
 
     def __init__(self, default_color):
+        '''
+        Keyword arguments:
+        default_color -- the default color to fall back to
+
+        '''
         self._default_color = default_color
 
         self._faces = {}
@@ -91,17 +100,21 @@ class Theme(object):
         self._faces['face-reset'] = self.property('normal')
 
     def control(self, name):
+        '''Get the control sequence of the specified name'''
         assert name in self._controls
         return self._controls[name]
 
     def property(self, name):
+        '''Get the property sequence of the specified name'''
         assert name in self._properties
         return (self._property_fmt % self._properties[name])
 
     def faces(self):
+        '''Get the dictionary of all defined faces'''
         return self._faces
 
     def face(self, name):
+        '''Get the face sequence of the specified name'''
         assert ('face-%s' % name) in self._faces
         return self._faces.get('face-%s' % name, self._faces['face-normal'])
 
@@ -115,6 +128,13 @@ class Theme(object):
         return string
 
     def len(self, string, format_dictionary=None):
+        '''Calculate the length of a string
+
+        Calculates the length of a string, after formatting, in number of
+        characters, including eventual theme formatting, when displayed on the
+        terminal.
+
+        '''
         d = self._faces
         if format_dictionary:
             d.update(format_dictionary)
@@ -123,6 +143,7 @@ class Theme(object):
         return len(self._ansi_escape_expression.sub('', (filtered % d)))
 
     def write(self, string, format_dictionary=None):
+        '''Apply theme formatting and return the resulting string'''
         d = self._faces
         if format_dictionary:
             d.update(format_dictionary)
