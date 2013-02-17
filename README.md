@@ -13,5 +13,5 @@ FlowUI has been tested with Python 2.7 and 3.3 on MacOS X and GNU/Linux.
 
 ## License
 
-(void)walker is distributed under the 3-clause "Revised BSD License". See
-LICENSE.md for the full license text.
+FlowUI is distributed under the 3-clause "Revised BSD License". See LICENSE.md
+for the full license text.
