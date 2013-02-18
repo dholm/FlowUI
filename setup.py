@@ -9,7 +9,7 @@ setup(name='FlowUI',
       packages=['flowui', 'flowui.widgets', 'flowui.themes',
                 'flowui.terminals'],
       version=__version__,
-      description='A flow-based textual presentation interface',
+      description='A flow-based data presentation interface',
       author='David Holm',
       author_email='dholmster@gmail.com',
       url='http://github.com/dholm/FlowUI/',
@@ -36,4 +36,7 @@ setup(name='FlowUI',
       character at a time and assuming the cursor is moved forward one
       character each time.
 
-      ''')
+      One typical use case for FlowUI is when having to present data through
+      the terminal interface of a third party application. In these cases it
+      might not be feasible to use ncurses or similar frameworks as they may
+      disrupt the applications normal output.''')
