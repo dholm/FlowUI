@@ -161,18 +161,19 @@ class AnsiTerminal(Terminal):
         string = string.expandtabs()
         if string[-1] == '\n':
             string = string[:-1] + ('%s\n' % self._sgr(0))
-        return string
+        return ''.join(['%(face-normal)s', string])
 
     def _fmt_string(self, string, dictionary=None):
         d = self._faces
         if dictionary:
             d.update(dictionary)
-        return string % d
+        return self._filter_string(string) % d
 
     def len(self, string, dictionary=None):
-        filtered = self._fmt_string(self._filter_string(string), dictionary)
+        filtered = self._fmt_string(string, dictionary)
         return len(self._ansi_escape_expression.sub('', filtered))
 
     def write(self, string, dictionary=None):
         '''Apply theme formatting and return the resulting string'''
-        self._terminal.write(self._fmt_string(string, dictionary))
+        filtered = self._fmt_string(string, dictionary)
+        self._terminal.write(filtered)

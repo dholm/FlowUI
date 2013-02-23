@@ -193,6 +193,10 @@ if __name__ == '__main__':
 
 ## Changelog
 
+### 0.2.1
+ - Fixes invalid length calculation when using AnsiTerminal
+ - Fixes issue when writing percent sign (%%)
+
 ### 0.2.0
  - Defines a domain-specific language for themes.
    - Breaks Python 3000 support in this release.

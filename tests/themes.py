@@ -41,6 +41,9 @@ class ThemeTest(object):
     def tearDown(self):
         self._terminal.reset()
 
+    def test_percent(self):
+        self._terminal.write('Unformatted: %%\n')
+
     def test_faces(self):
         self._terminal.reset()
         for name in self._theme.faces.keys():

@@ -8,9 +8,11 @@ import unittest
 def suite():
     loader = unittest.TestLoader()
     test_suite = unittest.TestSuite()
+    test_suite.addTests(loader.loadTestsFromModule(tests.terminals))
     test_suite.addTests(loader.loadTestsFromModule(tests.themes))
     test_suite.addTests(loader.loadTestsFromModule(tests.widgets))
     return test_suite
+
 
 def run_tests():
     s = suite()

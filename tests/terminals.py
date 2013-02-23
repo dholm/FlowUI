@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-# FlowUI unit tests __init__.py
+# FlowUI terminals unit tests
 #
 # Copyright (c) 2012-2013, David Holm <dholmster@gmail.com>
 # All rights reserved.
@@ -27,6 +25,20 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from tests.terminals import SysTerminalTest
-from tests.themes import SolarizedTest, ZenburnTest
-from tests.widgets import WidgetsTest
+from unittest import TestCase
+
+from flowui.terminals import SysTerminal
+
+
+class SysTerminalTest(TestCase):
+    def setUp(self):
+        self._terminal = SysTerminal()
+
+    def tearDown(self):
+        self._terminal.reset()
+
+    def test_percent(self):
+        self._terminal.write('Unformatted: %%\n')
+
+    def test_write(self):
+        self._terminal.write('Test\n')
