@@ -44,10 +44,6 @@ class SysTerminal(Terminal):
         depth = int(os.popen('tput colors').read().strip())
         super(SysTerminal, self).__init__(width, height, depth)
 
-    def reset(self):
-        # This basic terminal does not support formatting so do nothing
-        pass
-
     def write(self, string, dictionary=None):
         if dictionary is not None:
             string = string % dictionary

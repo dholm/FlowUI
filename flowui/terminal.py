@@ -59,11 +59,6 @@ class Terminal(object):
         self._depth = depth
 
     @abc.abstractmethod
-    def reset(self):
-        '''Reset terminal formatting back to normal output'''
-        raise NotImplementedError()
-
-    @abc.abstractmethod
     def write(self, string, dictionary=None):
         '''Write output to the terminal
 
@@ -123,6 +118,7 @@ class AnsiTerminal(Terminal):
         return ''.join(['\x1b[', ';'.join([str(x) for x in args]), 'm'])
 
     def reset(self):
+        '''Reset terminal formatting back to normal output'''
         self._terminal.write(self._sgr(0))
 
     def _fmt_depth(self, components, depth):

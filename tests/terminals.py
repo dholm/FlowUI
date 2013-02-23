@@ -34,9 +34,6 @@ class SysTerminalTest(TestCase):
     def setUp(self):
         self._terminal = SysTerminal()
 
-    def tearDown(self):
-        self._terminal.reset()
-
     def test_percent(self):
         self._terminal.write('Unformatted: %%\n')
 
