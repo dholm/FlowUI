@@ -27,7 +27,7 @@
 
 from unittest import TestCase
 
-from flowui import ThemedTerminal
+from flowui import AnsiTerminal
 from flowui.terminals import SysTerminal
 from flowui.themes import Solarized
 from flowui.widgets import Section
@@ -36,9 +36,7 @@ from flowui.widgets import table
 
 class WidgetsTest(TestCase):
     def setUp(self):
-        terminal = SysTerminal()
-        theme = Solarized(terminal.depth())
-        self._terminal = ThemedTerminal(terminal, theme)
+        self._terminal = AnsiTerminal(SysTerminal(), Solarized())
 
         self._terminal.reset()
         self._terminal.write('\n\t# Begin Widget #\n')

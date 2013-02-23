@@ -33,4 +33,4 @@ import flowui.widgets
 from flowui.theme import Theme
 import flowui.themes
 from flowui.terminal import Terminal
-from flowui.terminal import ThemedTerminal
+from flowui.terminal import AnsiTerminal

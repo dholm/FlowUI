@@ -197,6 +197,7 @@ class Table(Widget):
     def draw(self, terminal, width):
         '''Draw the table on the specified terminal constrained to the
         specified width'''
+        terminal.write('%(face-normal)s')
         if self._rows:
             self._draw_rows(terminal, width)
         if self._cells:

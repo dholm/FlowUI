@@ -25,7 +25,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from flowui.theme import Theme
+from flowui.theme import *
 
 
 class Solarized(Theme):
@@ -35,66 +35,166 @@ class Solarized(Theme):
     his page: http://ethanschoonover.com/solarized
 
     '''
-    _color_map = {8: [(0, 'bold'), 0, (2, 'bold'), (3, 'bold'), (4, 'bold'),
-                      (6, 'bold'), 7, (7, 'bold'), 3, (1, 'bold'), 1, 5,
-                      (5, 'bold'), 4, 6, 2],
+    name = 'Solarized'
 
-                  16: [8, 0, 10, 11, 12, 14, 7, 15, 3, 9, 1, 5, 13, 4, 6, 2],
+    pal = {'base03': {8: (Bold, 0), 16: 8, 256: 234},
+           'base02': {8: (Regular, 0), 16: 0, 256: 235},
+           'base01': {8: (Bold, 2), 16: 10, 256: 240},
+           'base00': {8: (Bold, 3), 16: 11, 256: 241},
+           'base0': {8: (Bold, 4), 16: 12, 256: 244},
+           'base1': {8: (Bold, 6), 16: 14, 256: 245},
+           'base2': {8: (Regular, 7), 16: 7, 256: 254},
+           'base3': {8: (Bold, 7), 16: 15, 256: 230},
+           'yellow': {8: (Regular, 3), 16: 3, 256: 136},
+           'orange': {8: (Bold, 1), 16: 9, 256: 166},
+           'red': {8: (Regular, 1), 16: 1, 256: 160},
+           'magenta': {8: (Regular, 5), 16: 5, 256: 125},
+           'violet': {8: (Bold, 5), 16: 13, 256: 61},
+           'blue': {8: (Regular, 4), 16: 4, 256: 33},
+           'cyan': {8: (Regular, 6), 16: 6, 256: 37},
+           'green': {8: (Regular, 2), 16: 2, 256: 64}}
 
-                  256: [234, 235, 240, 241, 244, 245, 254, 230, 136, 166, 160,
-                        125, 61, 33, 37, 64]}
+    faces = {
+        Normal: {depth(8): [pal['base0'][8][0],
+                            fg(pal['base0'][8][1]),
+                            bg(pal['base03'][8][1])],
 
-    _labels = ('base03 base02 base01 base00 base0 base1 base2 base3 yellow '
-               'orange red magenta violet blue cyan green').split()
+                 depth(16): [Regular,
+                             fg(pal['base0'][16]),
+                             bg(pal['base03'][16])],
 
-    def __init__(self, depth):
-        assert len(self._labels) == len(self._color_map.get(depth, 8))
-        colors = dict(zip(self._labels,
-                          [x if type(x) == tuple else (x, 'normal')
-                           for x in self._color_map.get(depth, 8)]))
+                 depth(256): [Regular,
+                              fg(pal['base0'][256]),
+                              bg(pal['base03'][256])]},
 
-        default_bg = colors['base03'][0]
-        default = self._color(depth, colors['base0'][0], default_bg,
-                              colors['base0'][1])
-        super(Solarized, self).__init__(default)
+        Comment: {depth(8): [pal['base01'][8][0],
+                             fg(pal['base01'][8][1]),
+                             bg(pal['base03'][8][1])],
 
-        normal = self._color(depth, colors['base0'][0], default_bg,
-                             colors['base0'][1])
-        self._add_face('normal', normal)
-        comment = self._color(depth, colors['base01'][0], default_bg, 'italic')
-        self._add_face('comment', comment)
-        constant = self._color(depth, colors['cyan'][0], default_bg,
-                               colors['cyan'][1])
-        self._add_face('constant', constant)
-        identifier = self._color(depth, colors['blue'][0], default_bg,
-                                 colors['blue'][1])
-        self._add_face('identifier', identifier)
-        statement = self._color(depth, colors['green'][0], default_bg,
-                                colors['green'][1])
-        self._add_face('statement', statement)
-        preproc = self._color(depth, colors['orange'][0], default_bg,
-                              colors['orange'][1])
-        self._add_face('preproc', preproc)
-        tp = self._color(depth, colors['yellow'][0], default_bg,
-                         colors['yellow'][1])
-        self._add_face('type', tp)
-        special = self._color(depth, colors['red'][0], default_bg,
-                              colors['red'][1])
-        self._add_face('special', special)
-        underlined = self._color(depth, colors['violet'][0], default_bg,
-                                 colors['violet'][1])
-        self._add_face('underlined', underlined)
-        error = self._color(depth, colors['red'][0], default_bg,
-                            colors['red'][1])
-        self._add_face('error', error, 'bold')
-        todo = self._color(depth, colors['magenta'][0], default_bg,
-                           colors['magenta'][1])
-        self._add_face('todo', todo, 'bold')
+                  depth(16): [Italic,
+                              fg(pal['base01'][16]),
+                              bg(pal['base03'][16])],
 
-        header = self._color(depth, colors['base1'][0], colors['base02'][0],
-                             colors['base1'][1])
-        self._add_face('header', header)
+                  depth(256): [Italic,
+                               fg(pal['base01'][256]),
+                               bg(pal['base03'][256])]},
 
-    @classmethod
-    def name(cls):
-        return 'solarized'
+        Constant: {depth(8): [pal['cyan'][8][0],
+                              fg(pal['cyan'][8][1]),
+                              bg(pal['base03'][8][1])],
+
+                   depth(16): [Regular,
+                               fg(pal['cyan'][16]),
+                               bg(pal['base03'][16])],
+
+                   depth(256): [Regular,
+                                fg(pal['cyan'][256]),
+                                bg(pal['base03'][256])]},
+
+        Identifier: {depth(8): [pal['blue'][8][0],
+                                fg(pal['blue'][8][1]),
+                                bg(pal['base03'][8][1])],
+
+                     depth(16): [Regular,
+                                 fg(pal['blue'][16]),
+                                 bg(pal['base03'][16])],
+
+                     depth(256): [Regular,
+                                  fg(pal['blue'][256]),
+                                  bg(pal['base03'][256])]},
+
+        Statement: {depth(8): [pal['green'][8][0],
+                               fg(pal['green'][8][1]),
+                               bg(pal['base03'][8][1])],
+
+                    depth(16): [Regular,
+                                fg(pal['green'][16]),
+                                bg(pal['base03'][16])],
+
+                    depth(256): [Regular,
+                                 fg(pal['green'][256]),
+                                 bg(pal['base03'][256])]},
+
+        Define: {depth(8): [pal['orange'][8][0],
+                            fg(pal['orange'][8][1]),
+                            bg(pal['base03'][8][1])],
+
+                 depth(16): [Regular,
+                             fg(pal['orange'][16]),
+                             bg(pal['base03'][16])],
+
+                 depth(256): [Regular,
+                              fg(pal['orange'][256]),
+                              bg(pal['base03'][256])]},
+
+        Type: {depth(8): [pal['yellow'][8][0],
+                          fg(pal['yellow'][8][1]),
+                          bg(pal['base03'][8][1])],
+
+               depth(16): [Regular,
+                           fg(pal['yellow'][16]),
+                           bg(pal['base03'][16])],
+
+               depth(256): [Regular,
+                            fg(pal['yellow'][256]),
+                            bg(pal['base03'][256])]},
+
+        Special: {depth(8): [pal['red'][8][0],
+                             fg(pal['red'][8][1]),
+                             bg(pal['base03'][8][1])],
+
+                  depth(16): [Regular,
+                              fg(pal['red'][16]),
+                              bg(pal['base03'][16])],
+
+                  depth(256): [Regular,
+                               fg(pal['red'][256]),
+                               bg(pal['base03'][256])]},
+
+        Underlined: {depth(8): [pal['violet'][8][0],
+                                fg(pal['violet'][8][1]),
+                                bg(pal['base03'][8][1])],
+
+                     depth(16): [Regular,
+                                 fg(pal['violet'][16]),
+                                 bg(pal['base03'][16])],
+
+                     depth(256): [Regular,
+                                  fg(pal['violet'][256]),
+                                  bg(pal['base03'][256])]},
+
+        Error: {depth(8): [pal['red'][8][0],
+                           fg(pal['red'][8][1]),
+                           bg(pal['base03'][8][1])],
+
+                depth(16): [Regular,
+                            fg(pal['red'][16]),
+                            bg(pal['base03'][16])],
+
+                depth(256): [Regular,
+                             fg(pal['red'][256]),
+                             bg(pal['base03'][256])]},
+
+        Attention: {depth(8): [pal['magenta'][8][0],
+                               fg(pal['magenta'][8][1]),
+                               bg(pal['base03'][8][1])],
+
+                    depth(16): [Regular,
+                                fg(pal['magenta'][16]),
+                                bg(pal['base03'][16])],
+
+                    depth(256): [Regular,
+                                 fg(pal['magenta'][256]),
+                                 bg(pal['base03'][256])]},
+
+        Header: {depth(8): [pal['base1'][8][0],
+                            fg(pal['base1'][8][1]),
+                            bg(pal['base02'][8][1])],
+
+                 depth(16): [Regular,
+                             fg(pal['base1'][16]),
+                             bg(pal['base02'][16])],
+
+                 depth(256): [Regular,
+                              fg(pal['base1'][256]),
+                              bg(pal['base02'][256])]}}

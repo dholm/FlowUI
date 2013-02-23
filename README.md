@@ -8,43 +8,45 @@ one character each time.
 
 ## Requirements
 
-FlowUI has been tested with Python 2.7 and 3.3 on MacOS X and GNU/Linux.
+FlowUI has been tested with Python 2.7 on MacOS X and GNU/Linux but it should
+work equally well on any terminal which supports
+[ANSI escape codes](http://en.wikipedia.org/wiki/ANSI_escape_code).
 
 
-## Format controls
+## Themes
+
+Theme's are loosely based on the controls used by [Vim](http://www.vim.org/)
+color schemes. This makes it easier to port existing themes to FlowUI. A
+domain-specific language similar to the one used to defined lexers in
+[Pygments](http://pygments.org/) is used to define a theme.
+
+
+### Format controls
 
 Text is formatted by embedding certain keywords in the string before sending it
-to the Theme's or ThemedTerminal's write method. For instance, to format the
+to the Theme's or AnsiTerminal's write method. For instance, to format the
 statement "if a < 5:" on could write:
 
 ```python
-"%(face-statement)sif%(face-normal)s %(face-identifier)sa%(face-normal)s < %(face-constant)s5%(face-normal)s:"
+('%(face-statement)sif%(face-normal)s %(face-identifier)sa%(face-normal)s < '
+ '%(face-constant)s5%(face-normal)s:')
 ```
 
 As seen in this example formatting can become quite verbose so prefer wrapping
 it inside a widget which inserts the necessary keywords so that strings remain
 readable inside your core logic.
 
-The format controls are based on the controls used by
-[Vim](http://www.vim.org/) color schemes. This makes it easier to port existing
-themes to FlowUI.
 
+### Typefaces
 
-### Terminal controls
-
- * clear-screen
-
-   Clear the screen and reset the cursor position.
-
-### Text properties
-
- * normal
+ * Regular
 
    Default face
 
- * bold
- * italic
- * underline
+ * Bold
+ * Italic
+ * Underline
+
 
 ### Text faces
 
@@ -151,7 +153,7 @@ of colors supported by the terminal in order for widgets to render properly.
 FlowUI comes with one terminal implementation, *SysTerminal*, which uses
 sys.stdout.
 
-*ThemedTerminal* is a decorator for the terminal object which attaches a theme
+*AnsiTerminal* is a decorator for the terminal object which attaches a theme
 to it while still providing the same interface as a *Terminal*.
 
 
@@ -184,15 +186,25 @@ def sample_table(term):
     experiment_section.draw(term, term.width())
 
 if __name__ == '__main__':
-    terminal = SysTerminal()
-    solarized = Solarized(terminal.depth())
-    themed_terminal = ThemedTerminal(terminal, solarized)
-    sample_table(themed_terminal)
+    ansi_terminal = AnsiTerminal(SysTerminal(), Solarized())
+    sample_table(ansi_terminal)
 ```
+
+
+## Changelog
+
+### 0.2.0
+ - Defines a domain-specific language for themes.
+   - Breaks Python 3000 support in this release.
+   - The new theme format makes it easier to write non-ANSI backends for
+     FlowUI and for this reason ThemedTerminal has been renamed AnsiTerminal.
+
+### 0.1.0
+ - Initial release
 
 
 ## License
 
 FlowUI is distributed under the 3-clause
-"[Revised BSD License](http://opensource.org/licenses/BSD-3-Clause)". See
+[Revised BSD License](http://opensource.org/licenses/BSD-3-Clause). See
 LICENSE.md for the full license text.

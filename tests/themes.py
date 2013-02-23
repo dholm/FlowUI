@@ -27,7 +27,7 @@
 
 from unittest import TestCase
 
-from flowui import ThemedTerminal
+from flowui import AnsiTerminal
 from flowui.terminals import SysTerminal
 from flowui.themes import Solarized
 from flowui.themes import Zenburn
@@ -36,27 +36,25 @@ from flowui.themes import Zenburn
 class ThemeTest(object):
     def setUp(self, terminal, theme):
         self._theme = theme
-        self._terminal = ThemedTerminal(terminal, theme)
+        self._terminal = AnsiTerminal(terminal, theme)
 
     def tearDown(self):
         self._terminal.reset()
 
     def test_faces(self):
         self._terminal.reset()
-        for name, face in self._theme.faces().items():
-            self._terminal.write('\t%s[%s]%s\n' %
-                                 (face, name, self._theme.property('normal')))
+        for name in self._theme.faces.keys():
+            self._terminal.write('\n\t%%(%s)s[%s]' % (name, name))
+
+        self._terminal.reset()
+        self._terminal.write('\n')
 
 
 class SolarizedTest(ThemeTest, TestCase):
     def setUp(self, terminal=None, theme=None):
-        terminal = SysTerminal()
-        theme = Solarized(terminal.depth())
-        super(SolarizedTest, self).setUp(terminal, theme)
+        super(SolarizedTest, self).setUp(SysTerminal(), Solarized())
 
 
 class ZenburnTest(ThemeTest, TestCase):
     def setUp(self, terminal=None, theme=None):
-        terminal = SysTerminal()
-        theme = Zenburn(terminal.depth())
-        super(ZenburnTest, self).setUp(terminal, theme)
+        super(ZenburnTest, self).setUp(SysTerminal(), Zenburn())

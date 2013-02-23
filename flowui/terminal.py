@@ -26,6 +26,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import abc
+import re
+
+import flowui.theme
 
 
 class Terminal(object):
@@ -56,6 +59,11 @@ class Terminal(object):
         self._depth = depth
 
     @abc.abstractmethod
+    def reset(self):
+        '''Reset terminal formatting back to normal output'''
+        raise NotImplementedError()
+
+    @abc.abstractmethod
     def write(self, string, dictionary=None):
         '''Write output to the terminal
 
@@ -77,8 +85,8 @@ class Terminal(object):
 
         '''
         if dictionary is not None:
-            string = string.format(dictionary)
-        len(string)
+            string = string % dictionary
+        return len(string)
 
     def depth(self):
         '''Get the terminal color depth as number of colors'''
@@ -93,7 +101,7 @@ class Terminal(object):
         return self._height
 
 
-class ThemedTerminal(Terminal):
+class AnsiTerminal(Terminal):
     '''Themed terminal decorator
 
     A decorator for terminal objects that combines the terminal instance with a
@@ -101,30 +109,59 @@ class ThemedTerminal(Terminal):
     instances don't have to be passed around together everywhere in the code.
 
     '''
+    _ansi_escape_expression = re.compile((r'\x1B\[((\d+|"[^"]*")'
+                                          r'(;(\d+|"[^"]*"))*)?'
+                                          r'[A-Za-z]'))
 
-    def __init__(self, terminal, theme):
+    _properties = {flowui.theme.Regular: 0,
+                   flowui.theme.Bold: 1,
+                   flowui.theme.Italic: 2,
+                   flowui.theme.Underline: 4}
+
+    def _sgr(self, *args):
+        return ''.join(['\x1b[', ';'.join([str(x) for x in args]), 'm'])
+
+    def reset(self):
+        self._terminal.write(self._sgr(0))
+
+    def _fmt_depth(self, components, depth):
+        tf = self._properties[components[flowui.theme.Typeface]]
+        fg = components[flowui.theme.fg]
+        bg = components[flowui.theme.bg]
+        if 16 <= depth:
+            return self._sgr(tf, 38, 5, fg, 48, 5, bg)
+        else:
+            return self._sgr(tf, (30 + fg), (40 + bg))
+
+    def _faces_dict(self, theme_, depth):
+        d = {}
+        for f in theme_.faces.keys():
+            face = theme_.face(f, depth)
+            d[repr(f)] = self._fmt_depth(face, depth)
+        return d
+
+    def __init__(self, terminal, theme_):
         '''
         Keyword arguments:
         terminal -- instance of terminal emulator
-        theme -- instance of theme
+        theme_ -- instance of theme
 
         '''
-        super(ThemedTerminal, self).__init__(terminal.width(),
-                                             terminal.height(),
-                                             terminal.depth())
+        super(AnsiTerminal, self).__init__(terminal.width(),
+                                           terminal.height(),
+                                           terminal.depth())
+        self._faces = self._faces_dict(theme_, terminal.depth())
         self._terminal = terminal
-        self._theme = theme
+
+    def _fmt_string(self, string, dictionary=None):
+        d = self._faces
+        if dictionary:
+            d.update(dictionary)
+        return string % d
 
     def len(self, string, dictionary=None):
-        return self._theme.len(string, dictionary)
-
-    def clear(self):
-        '''Clear the screen if supported by the terminal and theme'''
-        self._terminal.write(self._theme.control('clear-screen'))
-
-    def reset(self):
-        '''Reset theme formatting if supported by the terminal and theme'''
-        self._terminal.write(self._theme.property('normal'))
+        return len(self._fmt_string(string, dictionary))
 
     def write(self, string, dictionary=None):
-        self._terminal.write(self._theme.write(string, dictionary))
+        '''Apply theme formatting and return the resulting string'''
+        self._terminal.write(self._fmt_string(string, dictionary))

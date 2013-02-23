@@ -25,7 +25,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from flowui.theme import Theme
+from flowui.theme import *
 
 
 class Zenburn(Theme):
@@ -37,23 +37,18 @@ class Zenburn(Theme):
     http://slinky.imukuppi.org/zenburnpage/
 
     '''
-    def __init__(self, depth):
-        default_bg = 237
-        super(Zenburn, self).__init__(self._color(depth, 188, default_bg))
+    name = 'Zenburn'
 
-        self._add_face('comment', self._color(depth, 108, default_bg))
-        self._add_face('constant', self._color(depth, 181, default_bg, 'bold'))
-        self._add_face('identifier', self._color(depth, 223, default_bg))
-        self._add_face('statement', self._color(depth, 187, 234))
-        self._add_face('preproc', self._color(depth, 223, default_bg, 'bold'))
-        self._add_face('type', self._color(depth, 187, default_bg))
-        self._add_face('special', self._color(depth, 181, default_bg))
-        self._add_face('underlined', self._color(depth, 188, 234, 'bold'))
-        self._add_face('error', self._color(depth, 115, 236, 'bold'))
-        self._add_face('todo', self._color(depth, 108, 234, 'bold'))
-
-        self._add_face('header', self._color(depth, 108, 235))
-
-    @classmethod
-    def name(cls):
-        return 'zenburn'
+    faces = {
+        Normal: {depth(256): [Regular, fg(188), bg(237)]},
+        Comment: {depth(256): [Regular, fg(108), bg(237)]},
+        Constant: {depth(256): [Bold, fg(181), bg(237)]},
+        Identifier: {depth(256): [Regular, fg(223), bg(237)]},
+        Statement: {depth(256): [Regular, fg(187), bg(234)]},
+        Define: {depth(256): [Bold, fg(223), bg(237)]},
+        Type: {depth(256): [Bold, fg(187), bg(237)]},
+        Special: {depth(256): [Regular, fg(181), bg(237)]},
+        Underlined: {depth(256): [Bold, fg(188), bg(234)]},
+        Error: {depth(256): [Bold, fg(115), bg(236)]},
+        Attention: {depth(256): [Bold, fg(108), bg(234)]},
+        Header: {depth(256): [Regular, fg(108), bg(235)]}}

@@ -25,7 +25,144 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import re
+import itertools
+
+
+__all__ = ['Normal', 'Comment', 'Constant', 'Identifier', 'Statement',
+           'Define', 'Type', 'Special', 'Underlined', 'Error', 'Attention',
+           'Header', 'Regular', 'Italic', 'Bold', 'Underline', 'depth', 'fg',
+           'bg', 'Theme']
+
+
+class _Face(tuple):
+    def __init__(self, *_):
+        super(_Face, self).__init__()
+        self.subtypes = set()
+
+    def __getattr__(self, value):
+        if not value or not value[0].isupper():
+            return tuple.__getattribute__(self, value)
+
+        face = _Face(self + (value,))
+        setattr(self, value, face)
+        self.subtypes.add(face)
+        return face
+
+    def __repr__(self):
+        return 'face' + (self and '-' or '') + '-'.join(self).lower()
+
+
+Face = _Face()
+Normal = Face.Normal
+Comment = Face.Comment
+Constant = Face.Constant
+Identifier = Face.Identifier
+Statement = Face.Statement
+Define = Face.Define
+Type = Face.Type
+Special = Face.Special
+Underlined = Face.Underlined
+Error = Face.Error
+Attention = Face.Attention
+Header = Face.Header
+
+
+class _Typeface(tuple):
+    # pylint: disable=W0231
+    def __init__(self, *_):
+        self.subtypes = set()
+
+    def __getattr__(self, value):
+        if not value or not value[0].isupper():
+            return tuple.__getattribute__(self, value)
+
+        tp = _Typeface(self + (value,))
+        setattr(self, value, tp)
+        self.subtypes.add(tp)
+        return tp
+
+    def __repr__(self):
+        return 'typeface' + (self and '-' or '') + '-'.join(self).lower()
+
+
+Typeface = _Typeface()
+Regular = Typeface.Regular
+Italic = Typeface.Italic
+Bold = Typeface.Bold
+Underline = Typeface.Underline
+
+
+class depth(int):
+    pass
+
+
+class fg(int):
+    pass
+
+
+class bg(int):
+    pass
+
+
+class ThemeMeta(type):
+    def _process_definition(cls, fdef):
+        if type(fdef) is _Typeface:
+            return (Typeface, fdef)
+
+        elif type(fdef) is fg:
+            return (fg, fdef)
+
+        elif type(fdef) is bg:
+            return (bg, fdef)
+
+        else:
+            assert False, 'unknown definition %r' % fdef
+
+    def _process_color(cls, facesdefs):
+        face_attr = {}
+        for fdef in facesdefs:
+            attr = cls._process_definition(fdef)
+            face_attr[attr[0]] = attr[1]
+
+        return face_attr
+
+    def _process_face(cls, facesdefs, face):
+        face_colors = {}
+        for colors, fdefs in facesdefs[face].items():
+            assert type(colors) is depth
+            face_colors[colors] = cls._process_color(fdefs)
+
+        return face_colors
+
+    def process_faces(cls, name, facesdefs=None):
+        faces = {}
+        facesdefs = facesdefs or cls.faces[name]
+        for face in facesdefs.keys():
+            if type(face) is _Face:
+                faces[face] = cls._process_face(facesdefs, face)
+
+            else:
+                assert False, 'unknown face type %r' % face
+
+        return faces
+
+    def get_facesdefs(cls):
+        faces = {}
+        for c in itertools.chain((cls,), cls.__mro__):
+            fcs = c.__dict__.get('faces', {})
+            for name, components in fcs.items():
+                current = faces.get(name)
+                if current is None:
+                    faces[name] = components
+
+        return faces
+
+    def __call__(cls, *args, **kwds):
+        if '_faces' not in cls.__dict__ or not cls.__dict__['_faces']:
+            # pylint: disable=W0201
+            cls._faces = cls.process_faces('', cls.get_facesdefs())
+
+        return type.__call__(cls, *args, **kwds)
 
 
 class Theme(object):
@@ -39,8 +176,8 @@ class Theme(object):
     Controls:
     clear-screen -- Clear the screen and reset the cursor
 
-    Properties:
-    normal -- normal face
+    Typefaces:
+    regular
     bold
     italic
     underline
@@ -60,93 +197,16 @@ class Theme(object):
     face-header     -- section headers etc
 
     '''
-    _ansi_escape_expression = re.compile((r'\x1B\[((\d+|"[^"]*")'
-                                          r'(;(\d+|"[^"]*"))*)?'
-                                          r'[A-Za-z]'))
+    __metaclass__ = ThemeMeta
 
-    _controls = {'clear-screen': '\x1b[2J'}
-    _property_fmt = '\x1b[%dm'
-    _properties = {'normal': 0,
-                   'bold': 1,
-                   'italic': 2,
-                   'underline': 4}
-    _colors_fmt = {8: '\x1b[%d;3%1d;4%1dm',
-                   16: '\x1b[%d;38;5;%d;48;5;%dm',
-                   256: '\x1b[%d;38;5;%d;48;5;%dm'}
+    name = None
+    colors = []
+    faces = {}
 
-    def _add_face(self, face, color, prop='normal'):
-        if prop in self._properties:
-            prop = self._properties[prop]
-
-        self._faces['face-' + face] = '%s%s' % (self._property_fmt % prop,
-                                                color)
-
-    def _color(self, depth, fg, bg, prop='normal'):
-        if prop in self._properties:
-            prop = self._properties[prop]
-        return (self._colors_fmt.get(depth, 8) %
-                (prop, fg, bg))
-
-    def __init__(self, default_color):
-        '''
-        Keyword arguments:
-        default_color -- the default color to fall back to
-
-        '''
-        self._default_color = default_color
-
-        self._faces = {}
-        self._add_face('normal', default_color)
-        self._faces['face-reset'] = self.property('normal')
-
-    def control(self, name):
-        '''Get the control sequence of the specified name'''
-        assert name in self._controls
-        return self._controls[name]
-
-    def property(self, name):
-        '''Get the property sequence of the specified name'''
-        assert name in self._properties
-        return (self._property_fmt % self._properties[name])
-
-    def faces(self):
-        '''Get the dictionary of all defined faces'''
-        return self._faces
-
-    def face(self, name):
-        '''Get the face sequence of the specified name'''
-        assert ('face-%s' % name) in self._faces
-        return self._faces.get('face-%s' % name, self._faces['face-normal'])
-
-    def _filter_string(self, string):
-        if not len(string):
-            return string
-
-        string = string.expandtabs()
-        if string[-1] == '\n':
-            string = string[:-1] + ('%s\n' % self.property('normal'))
-        return string
-
-    def len(self, string, format_dictionary=None):
-        '''Calculate the length of a string
-
-        Calculates the length of a string, after formatting, in number of
-        characters, including eventual theme formatting, when displayed on the
-        terminal.
-
-        '''
-        d = self._faces
-        if format_dictionary:
-            d.update(format_dictionary)
-
-        filtered = self._filter_string(string)
-        return len(self._ansi_escape_expression.sub('', (filtered % d)))
-
-    def write(self, string, format_dictionary=None):
-        '''Apply theme formatting and return the resulting string'''
-        d = self._faces
-        if format_dictionary:
-            d.update(format_dictionary)
-
-        filtered = self._filter_string(string)
-        return '%s%s' % (self.face('normal'), (filtered % d))
+    def face(self, f, depth_):
+        '''Get the specified face'''
+        # pylint: disable=E1101
+        assert f in self._faces, 'face %r not found' % f
+        face = self._faces[f]
+        assert depth_ in face, 'depth %r not available in %f' % (depth_, face)
+        return face[depth_]
