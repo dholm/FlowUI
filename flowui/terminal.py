@@ -81,7 +81,8 @@ class Terminal(object):
         '''Calculate the length of a string
 
         Calculates the length of a string, after formatting, in number of
-        characters when displayed on the terminal.
+        characters, including eventual theme formatting, when displayed on the
+        terminal.
 
         '''
         if dictionary is not None:
@@ -153,6 +154,15 @@ class AnsiTerminal(Terminal):
         self._faces = self._faces_dict(theme_, terminal.depth())
         self._terminal = terminal
 
+    def _filter_string(self, string):
+        if not len(string):
+            return string
+
+        string = string.expandtabs()
+        if string[-1] == '\n':
+            string = string[:-1] + ('%s\n' % self._sgr(0))
+        return string
+
     def _fmt_string(self, string, dictionary=None):
         d = self._faces
         if dictionary:
@@ -160,7 +170,8 @@ class AnsiTerminal(Terminal):
         return string % d
 
     def len(self, string, dictionary=None):
-        return len(self._fmt_string(string, dictionary))
+        filtered = self._fmt_string(self._filter_string(string), dictionary)
+        return len(self._ansi_escape_expression.sub('', filtered))
 
     def write(self, string, dictionary=None):
         '''Apply theme formatting and return the resulting string'''
