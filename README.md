@@ -5,6 +5,9 @@ possible to move the cursor backwards. All widgets are designed so that they
 are rendered one character at a time and assuming the cursor is moved forward
 one character each time.
 
+Originally FlowUI was developed as the presentation toolkit for
+[(void)walker](https://github.com/dholm/voidwalker).
+
 
 ## Requirements
 
