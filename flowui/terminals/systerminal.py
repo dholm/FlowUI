@@ -41,7 +41,8 @@ class SysTerminal(Terminal):
     def __init__(self):
         width = int(os.popen('tput cols').read().strip())
         height = int(os.popen('tput lines').read().strip())
-        depth = int(os.popen('tput colors').read().strip())
+        depth = max(int(os.popen('tput colors').read().strip()),
+                    Terminal.DEFAULT_DEPTH)
         super(SysTerminal, self).__init__(width, height, depth)
 
     def write(self, string, dictionary=None):

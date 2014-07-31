@@ -25,6 +25,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from os import environ
 from unittest import TestCase
 
 from flowui.terminals import SysTerminal
@@ -39,3 +40,17 @@ class SysTerminalTest(TestCase):
 
     def test_write(self):
         self._terminal.write('Test\n')
+
+    def test_dumb(self):
+        term = environ['TERM']
+        exception = None
+        try:
+            environ['TERM'] = 'dumb'
+            dumb_terminal = SysTerminal()
+            dumb_terminal.write('Test dumb\n')
+        except Exception as e:
+            exception = e
+
+        environ['TERM'] = term
+        if exception is not None:
+            raise exception
